@@ -58,8 +58,10 @@ export class OrdersService {
         where: {
           code: data.couponCode,
           isActive: true,
-          OR: [{ expiresAt: null }, { expiresAt: { gte: new Date() } }],
-          OR: [{ startsAt: null }, { startsAt: { lte: new Date() } }] as any,
+          AND: [
+            { OR: [{ expiresAt: null }, { expiresAt: { gte: new Date() } }] },
+            { OR: [{ startsAt: null }, { startsAt: { lte: new Date() } }] },
+          ],
         },
       });
       if (!coupon) throw new ValidationError('Invalid or expired coupon code');
@@ -197,7 +199,7 @@ export class OrdersService {
       include: {
         items: true,
         payment: true,
-        customer: { select: { firstName: true, lastName: true, email: true, phone: true } },
+        user: { select: { firstName: true, lastName: true, email: true, phone: true } },
       },
     });
 
@@ -262,7 +264,7 @@ export class OrdersService {
         orderBy: { createdAt: 'desc' },
         include: {
           items: { where: { sellerId } },
-          customer: { select: { firstName: true, lastName: true, email: true } },
+          user: { select: { firstName: true, lastName: true, email: true } },
         },
       }),
       ids.length,
@@ -288,7 +290,7 @@ export class OrdersService {
         include: {
           items: true,
           payment: { select: { status: true, amount: true } },
-          customer: { select: { firstName: true, lastName: true, email: true } },
+          user: { select: { firstName: true, lastName: true, email: true } },
         },
       }),
       prisma.order.count({ where }),

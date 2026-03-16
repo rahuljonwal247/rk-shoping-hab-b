@@ -5,22 +5,26 @@ import { logger } from "./logger";
 
 let redis: Redis | null = null;
 
-try {
-  const client = new Redis(env.REDIS_URL, {
-    lazyConnect: true,
-    maxRetriesPerRequest: null,
-    retryStrategy: () => null,
-  });
+if (env.REDIS_URL) {
+  try {
+    const client = new Redis(env.REDIS_URL, {
+      lazyConnect: true,
+      maxRetriesPerRequest: null,
+      retryStrategy: () => null,
+    });
 
-  client.connect().then(() => {
-    logger.info("✅ Redis connected");
-    redis = client;
-  }).catch(() => {
-    logger.warn("⚠️ Redis not available. Running without Redis.");
-  });
+    client.connect().then(() => {
+      logger.info("✅ Redis connected");
+      redis = client;
+    }).catch(() => {
+      logger.warn("⚠️ Redis not available. Running without Redis.");
+    });
 
-} catch {
-  logger.warn("⚠️ Redis disabled");
+  } catch {
+    logger.warn("⚠️ Redis connection failed");
+  }
+} else {
+  logger.info("ℹ️ Redis URL not configured. Running without Redis.");
 }
 
 export { redis };

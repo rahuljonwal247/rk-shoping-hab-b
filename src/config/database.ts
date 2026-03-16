@@ -7,19 +7,28 @@ declare global {
   var __prisma: PrismaClient | undefined;
 }
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 export const prisma = global.__prisma ?? new PrismaClient({
-  log: [
-    { emit: 'event', level: 'query' },
-    { emit: 'event', level: 'error' },
-    { emit: 'event', level: 'warn' },
-  ],
+  log: isProduction
+    ? [{ emit: 'event', level: 'error' }]
+    : [
+        { emit: 'event', level: 'query' },
+        { emit: 'event', level: 'error' },
+        { emit: 'event', level: 'warn' },
+      ],
+  datasources: {
+    db: {
+      url: `${process.env.DATABASE_URL}${isProduction ? '?connection_limit=10&pool_timeout=20' : ''}`,
+    },
+  },
 });
 
-if (process.env.NODE_ENV !== 'production') {
+if (!isProduction) {
   global.__prisma = prisma;
 }
 
-prisma.$on('error', (e) => {
+prisma.$on('error' as never, (e: any) => {
   logger.error('Prisma error:', e);
 });
 

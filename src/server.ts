@@ -29,6 +29,9 @@ import paymentsRoutes from './modules/payments/payments.routes';
 
 const app = express();
 
+// ─── Trust Proxy (required for Render / reverse proxies) ─────────────────────
+app.set('trust proxy', 1);
+
 // ─── Security ─────────────────────────────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: {
@@ -42,7 +45,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: env.FRONTEND_URL,
+  origin: env.FRONTEND_URL === '*' ? '*' : env.FRONTEND_URL.split(',').map(s => s.trim()),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

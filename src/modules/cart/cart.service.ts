@@ -12,7 +12,7 @@ export class CartService {
             product: {
               include: {
                 images: { where: { isPrimary: true }, take: 1 },
-                seller: { select: { id: true, sellerProfile: { select: { shopName: true } } } },
+                seller: { select: { id: true, shopName: true } },
               },
             },
             variant: true,

@@ -16,7 +16,7 @@ function createStore(prefix: string) {
 
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
   store: createStore("rl:general:"),

@@ -74,7 +74,9 @@ export class AuthService {
     });
 
     // Store verify token in Redis (24h)
-    await redis.setex(REDIS_KEYS.otpVerify(user.email), 86400, verifyToken);
+    if (redis) {
+      await redis.setex(REDIS_KEYS.otpVerify(user.email), 86400, verifyToken);
+    }
 
     // Send verification email (non-blocking)
     sendEmail({
@@ -162,6 +164,7 @@ export class AuthService {
     if (!user) return; // Don't reveal if email exists
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    if (!redis) throw new AppError('Redis is required for password reset', 503, 'SERVICE_UNAVAILABLE');
     await redis.setex(REDIS_KEYS.otpReset(data.email), 600, otp); // 10 min
 
     await sendEmail({
@@ -172,6 +175,7 @@ export class AuthService {
   }
 
   async resetPassword(data: ResetPasswordInput): Promise<void> {
+    if (!redis) throw new AppError('Redis is required for password reset', 503, 'SERVICE_UNAVAILABLE');
     const storedOtp = await redis.get(REDIS_KEYS.otpReset(data.email));
     if (!storedOtp || storedOtp !== data.otp) {
       throw new ValidationError('Invalid or expired OTP');
@@ -188,6 +192,7 @@ export class AuthService {
   }
 
   async verifyEmail(email: string, token: string): Promise<void> {
+    if (!redis) throw new AppError('Redis is required for email verification', 503, 'SERVICE_UNAVAILABLE');
     const stored = await redis.get(REDIS_KEYS.otpVerify(email));
     if (!stored || stored !== token) throw new ValidationError('Invalid verification link');
 

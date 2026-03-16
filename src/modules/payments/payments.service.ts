@@ -35,8 +35,11 @@ export class PaymentsService {
     const orderId = intent.metadata.orderId;
     if (!orderId) return;
 
+    const payment = await prisma.payment.findFirst({ where: { stripeIntentId: intent.id } });
+    if (!payment) return;
+
     await prisma.payment.update({
-      where: { stripeIntentId: intent.id },
+      where: { id: payment.id },
       data: { status: 'SUCCEEDED', stripePaymentId: intent.latest_charge as string },
     });
 
@@ -63,8 +66,11 @@ export class PaymentsService {
     const orderId = intent.metadata.orderId;
     if (!orderId) return;
 
+    const payment = await prisma.payment.findFirst({ where: { stripeIntentId: intent.id } });
+    if (!payment) return;
+
     await prisma.payment.update({
-      where: { stripeIntentId: intent.id },
+      where: { id: payment.id },
       data: { status: 'FAILED' },
     });
 

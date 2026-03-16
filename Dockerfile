@@ -23,10 +23,9 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy built files and prisma
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/src/prisma ./prisma
+COPY --from=builder /app/prisma ./prisma
 
-# Create logs directory
-RUN mkdir -p logs && chown -R node:node /app
+RUN chown -R node:node /app
 USER node
 
 EXPOSE 5000
